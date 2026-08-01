@@ -37,30 +37,21 @@
       </div>
 
       <div class="hero__copy">
-        <p class="hero__eyebrow">Token Launch</p>
+        <p class="hero__eyebrow">✅ Листинг состоялся</p>
         <h1 class="hero__title">CortexGame</h1>
         <p class="hero__lead">
-          Монета для активации виртуальных машин. Подключи кошелёк — получи токены при запуске и выведи их на биржу.
+          Монета успешно запущена! Подключи кошелёк и получи начисление токенов.
         </p>
 
-        <div class="countdown" id="countdown" role="timer" aria-live="polite" aria-label="До выхода монеты">
-          <div class="countdown__unit">
-            <span class="countdown__value" id="cdHours">11</span>
-            <span class="countdown__label">часов</span>
-          </div>
-          <span class="countdown__sep" aria-hidden="true">:</span>
-          <div class="countdown__unit">
-            <span class="countdown__value" id="cdMinutes">38</span>
-            <span class="countdown__label">минут</span>
-          </div>
-          <span class="countdown__sep" aria-hidden="true">:</span>
-          <div class="countdown__unit">
-            <span class="countdown__value" id="cdSeconds">00</span>
-            <span class="countdown__label">секунд</span>
+        <!-- ===== НОВЫЙ БЛОК БЕЗ ТАЙМЕРА ===== -->
+        <div class="countdown" id="countdown" role="timer" aria-live="polite" aria-label="Листинг состоялся">
+          <div class="countdown__unit" style="min-width: auto; padding: 1rem 2rem; border-color: rgba(74, 222, 128, 0.3);">
+            <span class="countdown__value" style="font-size: 2.2rem; color: #4ade80;">✅</span>
+            <span class="countdown__label" style="font-size: 0.9rem; color: #4ade80;">ЛИСТИНГ СОСТОЯЛСЯ</span>
           </div>
         </div>
 
-        <p class="countdown__caption">До выхода монеты осталось</p>
+        <p class="countdown__caption" style="color: #4ade80; font-weight: 600;">Токен CortexGame успешно запущен! Подключай кошелёк для начисления.</p>
 
         <div class="hero__actions">
           <button type="button" class="btn btn--primary" id="connectWallet">Подключить кошелёк</button>
@@ -139,7 +130,7 @@
     <p>© 2026 CortexGame. Token for VM activation.</p>
   </footer>
 
-  <!-- ===== МОДАЛКА ВЫБОРА КОШЕЛЬКА (ИСПРАВЛЕННАЯ) ===== -->
+  <!-- ===== МОДАЛКА ВЫБОРА КОШЕЛЬКА ===== -->
   <div class="modal" id="walletModal" hidden>
     <div class="modal__backdrop" data-close-modal></div>
     <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -214,9 +205,30 @@
             <span class="wallet-option__hint">Браузерное расширение</span>
           </span>
         </button>
+
+        <!-- SafePal -->
+        <button type="button" class="wallet-option" data-wallet="SafePal">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#4A21EF"/><circle cx="20" cy="20" r="9" fill="none" stroke="#7CF0FF" stroke-width="2.2"/><circle cx="20" cy="20" r="4.2" fill="#7CF0FF"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">SafePal</span>
+            <span class="wallet-option__hint">Аппаратный кошелёк</span>
+          </span>
+        </button>
+
+        <!-- Antarctic -->
+        <button type="button" class="wallet-option" data-wallet="Antarctic">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#0B1F33"/><path d="M20 8.5c4.2 0 7.2 2.8 7.2 7.1 0 2.4-1 4.5-2.6 5.9l1.6 8.1H13.8l1.6-8.1A7.4 7.4 0 0 1 12.8 15.6C12.8 11.3 15.8 8.5 20 8.5z" fill="#fff"/><ellipse cx="20" cy="16.2" rx="4.2" ry="3.6" fill="#0B1F33"/><circle cx="18.4" cy="15.8" r="0.9" fill="#7CF0FF"/><circle cx="21.6" cy="15.8" r="0.9" fill="#7CF0FF"/><path d="M16.5 29.6h7l1.2 2.4H15.3l1.2-2.4z" fill="#7CF0FF"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">Antarctic</span>
+            <span class="wallet-option__hint">Web3 кошелёк</span>
+          </span>
+        </button>
       </div>
 
-      <!-- ===== КНОПКА "ПОДКЛЮЧИТЬ" — ОНА БЫЛА ПРОПУЩЕНА ===== -->
       <button type="button" class="btn btn--primary" id="connectBtn" style="width:100%; margin-top: 16px; padding: 14px; border-radius: 8px; font-size: 16px;">
         🔗 Подключить
       </button>
