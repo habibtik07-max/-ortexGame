@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CortexGame — Token Launch</title>
+  <meta name="description" content="CortexGame Token — монета для активации виртуальных машин. Подключи кошелёк и получи токены при запуске." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--cyan" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--magenta" aria-hidden="true"></div>
+
+  <header class="header">
+    <a class="brand" href="#top">
+      <img src="assets/coin.png" alt="" class="brand__mark" width="36" height="36" />
+      <span class="brand__name">CortexGame</span>
+    </a>
+    <nav class="nav">
+      <a href="#about">О проекте</a>
+      <a href="#how">Как это работает</a>
+      <a href="#token">Токен</a>
+    </nav>
+    <button type="button" class="btn btn--ghost" id="connectWalletNav">Подключить кошелёк</button>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero__visual">
+        <div class="coin-orbit" aria-hidden="true"></div>
+        <img src="assets/coin.png" alt="CortexGame Crypto Token" class="hero__coin" />
+      </div>
+
+      <div class="hero__copy">
+        <p class="hero__eyebrow">Token Launch</p>
+        <h1 class="hero__title">CortexGame</h1>
+        <p class="hero__lead">
+          Монета для активации виртуальных машин. Подключи кошелёк — получи токены при запуске и выведи их на биржу.
+        </p>
+
+        <div class="countdown" id="countdown" role="timer" aria-live="polite" aria-label="До выхода монеты">
+          <div class="countdown__unit">
+            <span class="countdown__value" id="cdHours">11</span>
+            <span class="countdown__label">часов</span>
+          </div>
+          <span class="countdown__sep" aria-hidden="true">:</span>
+          <div class="countdown__unit">
+            <span class="countdown__value" id="cdMinutes">38</span>
+            <span class="countdown__label">минут</span>
+          </div>
+          <span class="countdown__sep" aria-hidden="true">:</span>
+          <div class="countdown__unit">
+            <span class="countdown__value" id="cdSeconds">00</span>
+            <span class="countdown__label">секунд</span>
+          </div>
+        </div>
+
+        <p class="countdown__caption">До выхода монеты осталось</p>
+
+        <div class="hero__actions">
+          <button type="button" class="btn btn--primary" id="connectWallet">Подключить кошелёк</button>
+          <a class="btn btn--ghost" href="#how">Как получить токены</a>
+        </div>
+
+        <p class="wallet-status" id="walletStatus" hidden></p>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section__head">
+        <h2>О компании</h2>
+        <p>CortexGame выпускает утилитарный токен для активации вычислительных мощностей — виртуальных машин в экосистеме проекта.</p>
+      </div>
+      <div class="split">
+        <article class="split__block">
+          <h3>Зачем нужна монета</h3>
+          <p>Токен CortexGame — ключ к активации VM. Без него мощности не запускаются: монета связывает владельца кошелька с доступом к инфраструктуре.</p>
+        </article>
+        <article class="split__block">
+          <h3>Что получают участники</h3>
+          <p>При запуске каждый подключённый кошелёк получает начисление токенов. Накопление идёт автоматически — дальше можно вывести монеты на биржу.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section section--tight" id="how">
+      <div class="section__head">
+        <h2>Как это работает</h2>
+        <p>Три шага от подключения кошелька до вывода на биржу.</p>
+      </div>
+      <ol class="steps">
+        <li class="steps__item">
+          <span class="steps__num">01</span>
+          <h3>Подключи кошелёк</h3>
+          <p>MetaMask или совместимый Web3-кошелёк. Адрес фиксируется в системе начисления.</p>
+        </li>
+        <li class="steps__item">
+          <span class="steps__num">02</span>
+          <h3>Жди накопление</h3>
+          <p>После выхода монеты токены начинают поступать на подключённый кошелёк автоматически.</p>
+        </li>
+        <li class="steps__item">
+          <span class="steps__num">03</span>
+          <h3>Выведи на биржу</h3>
+          <p>Полученные CortexGame-токены можно вывести и торговать на поддерживаемых биржах.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" id="token">
+      <div class="token-panel">
+        <div class="token-panel__copy">
+          <h2>CortexGame Token</h2>
+          <p>Утилитарный актив экосистемы: активация VM, начисление на кошелёк участников и возможность вывода на биржу после запуска.</p>
+          <ul class="token-list">
+            <li>Активация виртуальных машин</li>
+            <li>Автоначисление на подключённый кошелёк</li>
+            <li>Вывод и торговля после листинга</li>
+          </ul>
+          <button type="button" class="btn btn--primary" id="connectWalletMid">Подключить кошелёк</button>
+        </div>
+        <div class="token-panel__visual">
+          <img src="assets/coin.png" alt="" class="token-panel__coin" />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__brand">
+      <img src="assets/coin.png" alt="" width="28" height="28" />
+      <span>CortexGame</span>
+    </div>
+    <p>© 2026 CortexGame. Token for VM activation.</p>
+  </footer>
+
+  <!-- ===== МОДАЛКА ВЫБОРА КОШЕЛЬКА (ИСПРАВЛЕННАЯ) ===== -->
+  <div class="modal" id="walletModal" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__head">
+        <div class="modal__title-row">
+          <span class="modal__icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M10 13a5 5 0 0 0 7.54.54l1.5-1.5a5 5 0 0 0-7.07-7.07l-.86.86" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-1.5 1.5a5 5 0 0 0 7.07 7.07l.86-.86" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <h2 id="modalTitle">Подключить кошелёк</h2>
+            <p class="modal__subtitle">Выберите ваш кошелёк</p>
+          </div>
+        </div>
+        <button type="button" class="modal__close" data-close-modal aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="wallet-list" id="walletList">
+        <!-- Trust Wallet -->
+        <button type="button" class="wallet-option" data-wallet="Trust Wallet">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#3375BB"/><path d="M20 8.5c4.8 3.2 8.2 3.5 9.5 3.5v8.2c0 5.8-3.9 11-9.5 12.8-5.6-1.8-9.5-7-9.5-12.8V12c1.3 0 4.7-.3 9.5-3.5z" fill="#fff"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">Trust Wallet</span>
+            <span class="wallet-option__hint">Мобильный кошелёк</span>
+          </span>
+        </button>
+
+        <!-- MetaMask -->
+        <button type="button" class="wallet-option" data-wallet="MetaMask">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#1a1a1a"/><path d="M31.5 10.2 21.8 17.3l1.8-4.2 7.9-2.9zm-23 0 7.8 3 1.9 4.1-9.7-7.1zm20.3 14.6-2.7 4.1 5.7 1.6 1.6-5.5-4.6-.2zm-21.6-.2 1.6 5.5 5.7-1.6-2.7-4.1-4.6.2zM18.4 18.1l-1.6 2.5 3.7.2-.1-4-.2 1.3zm3.2 0 .1-1.3-.1 4 3.7-.2-1.6-2.5-.2-.1zm-5.8 5.2 2.5 3.9-.1-3.1-2.4-.8zm9.4-.8-2.5.8-.1 3.1 2.6-3.9zm-9.7 7.5 3.9-.1-2.5-1.8-.2-.9-1.2 2.8zm13.1-2.8-.2.9-2.5 1.8 3.9.1-1.2-2.8z" fill="#E2761B"/><path d="M31.5 10.2 20.8 18l.8 3.3 1.8-4 8.1-7.1zm-23 0 8.1 7.1 1.8 4 .8-3.3-10.7-7.8zM16.3 26.4l-2.5-3.9-.8 5.3 3.3-1.4zm10.1-3.9-2.5 3.9 3.3 1.4-.8-5.3zm-6.3 7.5 1.3-2.8-1.1-.8.1 1.5-.3 2.1zm5.7-3.6-1.1.8 1.3 2.8-.3-2.1.1-1.5z" fill="#E4761B"/><path d="M20.7 21.3l-1.8 4 .5 3.2 5.4-7.2h-4.1zm-1.4 0h-4.1l5.4 7.2.5-3.2-1.8-4z" fill="#D7C1B3"/><path d="M16.3 26.4l2.5 3.9v2.1l-3.3-1.4.8-4.6zm7.4 3.9 2.5-3.9.8 4.6-3.3 1.4v-2.1z" fill="#233447"/><path d="M24.7 32.4v-2.1l-1.3 1.1.1 1.4 1.2-.4zm-7.9-2.1v2.1l1.2.4.1-1.4-1.3-1.1z" fill="#CD6116"/><path d="M17.6 23.3l-2.4.8 2.5 3.9 1.1-.8-1.2-3.9zm7.2.8-2.4-.8-1.2 3.9 1.1.8 2.5-3.9z" fill="#E4751F"/><path d="M16.8 32.4l3.3 1.4 1.3-1.1v-1.5l-4.6 1.2zm6.5-.2v1.5l1.3 1.1 3.3-1.4-4.6-1.2z" fill="#F6851B"/><path d="M25.2 18.1l-3.7.2.1 2 .2 1.1 2.1-.1 1.3-3.2zm-10.4 0 1.3 3.2 2.1.1.2-1.1.1-2-3.7-.2z" fill="#C0AD9E"/><path d="M15.2 12.1l1.1 6.7-.1 4 5.1-6.3-6.1-4.4zm11.1 0-6.1 4.4 5.1 6.3-.1-4 1.1-6.7z" fill="#161616"/><path d="M31.5 10.2 20.8 18.1l4.4-3.7 3.1.8 3.2-4.9zm-23 0 3.2 4.9 3.1-.8 4.4 3.7L8.5 10.2z" fill="#763D16"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">MetaMask</span>
+            <span class="wallet-option__hint">Браузерное расширение</span>
+          </span>
+        </button>
+
+        <!-- Coinbase Wallet -->
+        <button type="button" class="wallet-option" data-wallet="Coinbase Wallet">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#0052FF"/><rect x="12" y="12" width="16" height="16" rx="4" fill="#fff"/><rect x="17" y="17" width="6" height="6" rx="1.5" fill="#0052FF"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">Coinbase Wallet</span>
+            <span class="wallet-option__hint">Мобильный кошелёк</span>
+          </span>
+        </button>
+
+        <!-- WalletConnect -->
+        <button type="button" class="wallet-option" data-wallet="WalletConnect">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#3B99FC"/><path d="M12.8 17.2a10.2 10.2 0 0 1 14.4 0l.5.5a.6.6 0 0 1 0 .8l-1.6 1.6a.3.3 0 0 1-.4 0l-.7-.6a7.1 7.1 0 0 0-10 0l-.7.7a.3.3 0 0 1-.4 0l-1.6-1.6a.6.6 0 0 1 0-.8l.5-.6zm17.8 3.3 1.5 1.5a.6.6 0 0 1 0 .8l-6.6 6.6a.6.6 0 0 1-.8 0l-4.7-4.7a.15.15 0 0 0-.2 0l-4.7 4.7a.6.6 0 0 1-.8 0l-6.6-6.6a.6.6 0 0 1 0-.8l1.5-1.5a.6.6 0 0 1 .8 0l4.7 4.7c.06.05.15.05.2 0l4.7-4.7a.6.6 0 0 1 .8 0l4.7 4.7c.06.05.15.05.2 0l4.7-4.7a.6.6 0 0 1 .8 0z" fill="#fff"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">WalletConnect</span>
+            <span class="wallet-option__hint">Подключение через QR</span>
+          </span>
+        </button>
+
+        <!-- OKX Wallet -->
+        <button type="button" class="wallet-option" data-wallet="OKX Wallet">
+          <span class="wallet-option__icon" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="10" fill="#000"/><rect x="9" y="9" width="8" height="8" rx="1.5" fill="#fff"/><rect x="23" y="9" width="8" height="8" rx="1.5" fill="#fff"/><rect x="9" y="23" width="8" height="8" rx="1.5" fill="#fff"/><rect x="16" y="16" width="8" height="8" rx="1.5" fill="#fff"/><rect x="23" y="23" width="8" height="8" rx="1.5" fill="#fff"/></svg>
+          </span>
+          <span class="wallet-option__text">
+            <span class="wallet-option__name">OKX Wallet</span>
+            <span class="wallet-option__hint">Браузерное расширение</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- ===== КНОПКА "ПОДКЛЮЧИТЬ" — ОНА БЫЛА ПРОПУЩЕНА ===== -->
+      <button type="button" class="btn btn--primary" id="connectBtn" style="width:100%; margin-top: 16px; padding: 14px; border-radius: 8px; font-size: 16px;">
+        🔗 Подключить
+      </button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

